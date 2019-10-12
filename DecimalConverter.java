@@ -12,19 +12,15 @@ public class DecimalConverter
          System.out.println("Enter a positive number");
          number = input.nextInt();
       }
-      binaryConvert(number);
+      int bits = getBits(number);
+      binaryConvert(number, bits);
       if (number >= 0)
          hexConvert(number);
    } 
    
-   private static void binaryConvert(int number)
+   private static int getBits (int number)
    {
-      int temp;
-      boolean isNegative = false;
-      String binaryAnswer = "";
-      int carry = 1;
-      int bits;
-      
+   int bits;
       if (number >= -8 && number <= 7)                         //Sets the appropriate number of bits
          bits = 4;
       else if (number >= -128 && number <= 127)
@@ -33,10 +29,18 @@ public class DecimalConverter
          bits = 12;
       else
          bits = 16;
+         
+      return bits;
+   }
+   
+   private static void binaryConvert(int number, int bits)
+   {
+      int temp;
+      boolean isNegative = false;
+      String binaryAnswer = "";
+      int carry = 1;
      
       LinkedList<Integer> stack = new LinkedList<Integer>();  //Used to reverse the order of characters so the binary is correct
-      ArrayList<Integer> stack2 = new ArrayList<Integer>();   //Used to reverse the order of characters so the binary is correct
-      ArrayList<Integer> twosComp = new ArrayList<Integer>();
       
       if (number < 0)
          isNegative = true;
@@ -44,11 +48,8 @@ public class DecimalConverter
       while (number != 0)
       {
          temp = number % 2;                                    //Holds the modulo temporarily
-         if (isNegative == true)
-         {  
-            if (temp != 0)
-               temp += 2;
-         }
+         if (isNegative == true && temp == -1)                 //Converts a negative 1 modulo to a positive 1 for negative numbers
+            temp = 1;
          stack.push(temp);                                     //Pushes the modulo into the linked list
          number = (number / 2);
       }
@@ -56,64 +57,71 @@ public class DecimalConverter
       for (int i = stack.size(); i < bits; i++)                //Adds the necessary number of bits
       {
          stack.add(0, 0);
-      }
-      
-      if (isNegative == true)                               
-      {
-         while (!stack.isEmpty())
-         {
-            if (stack.pop() == 0)                              //Flips the bits for 1's comp
-            {
-               temp = 1;
-            }
-            else
-               temp = 0;
-               
-               twosComp.add(temp);
-        }  
-        for (int i = twosComp.size() - 1; i >= 0; i--)        //Adds +1 to the binary number to get the 2's comp
-        {     
-            temp = twosComp.get(i);
-            if ((temp + carry) == 0)
-            {
-               temp = 0;
-               carry = 0;  
-            }
-            else if ((temp + carry) == 1)
-            {
-               temp = 1;
-               carry = 0;
-            }
-            else if ((temp + carry) == 2)
-            {
-               temp = 0;
-               carry = 1;
-            }
-            else
-            {
-               temp = 1;
-               carry = 1;
-            }
-               stack2.add(temp);
-         } 
-
-      }
+      }    
+        
+      if (isNegative == true) 
+         convertNeg(stack);
       else
-      {
-         while (!stack.isEmpty()) 
+      {   
+      while (!stack.isEmpty()) 
          {
                binaryAnswer += Integer.toString(stack.pop());     //Combines the individual integers into one string
          }
+         System.out.println("2's Complement Binary: " + binaryAnswer);  
       }
-      
-      for (int i = stack2.size() - 1; i >= 0; i--)
-      {   
-          binaryAnswer += stack2.get(i);
-      }     
-      
-      System.out.println("2's Complement Binary: " + binaryAnswer);   
    }
    
+   private static void convertNeg(LinkedList<Integer> stack)
+   {
+      int temp;
+      String binaryAnswer = "";
+      int carry = 1;
+      
+      ArrayList<Integer> stack2 = new ArrayList<Integer>();   //Used to reverse the order of characters so the binary is correct
+      ArrayList<Integer> twosComp = new ArrayList<Integer>();
+      
+      while (!stack.isEmpty())
+      {
+         if (stack.pop() == 0)                              //Flips the bits for 1's comp
+         {
+            temp = 1;
+         }
+         else
+            temp = 0;
+               
+            twosComp.add(temp);
+     }  
+     for (int i = twosComp.size() - 1; i >= 0; i--)        //Adds +1 to the binary number to get the 2's comp
+     {     
+        temp = twosComp.get(i);
+        if ((temp + carry) == 0)
+        {
+            temp = 0;
+            carry = 0;  
+        }
+        else if ((temp + carry) == 1)
+        {
+            temp = 1;
+            carry = 0;
+        }
+        else if ((temp + carry) == 2)
+        {
+            temp = 0;
+            carry = 1;
+        }
+        else
+        {
+            temp = 1;
+            carry = 1;
+        }
+            stack2.add(temp);
+     }
+     for (int j = stack2.size() - 1; j >= 0; j--)
+        {   
+          binaryAnswer += stack2.get(j);
+        }  
+     System.out.println("2's Complement Binary: " + binaryAnswer);
+   }
    private static void hexConvert(int number)
    {
       String temp;
